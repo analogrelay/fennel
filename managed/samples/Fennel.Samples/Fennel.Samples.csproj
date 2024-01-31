@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>System</RootNamespace>
+
+    <BuildForFennel Condition="'$(BuildForFennel)' == ''">true</BuildForFennel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BuildForFennel)' == 'true'">
+    <NoStdLib>true</NoStdLib>
+    <UseAppHost>false</UseAppHost>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+
+    <!-- TODO: Remove these when we have the attributes implemented, or switch to real corlib components? -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BuildForFennel)' == 'false'">
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(BuildForFennel)' == 'true'">
+    <ProjectReference Include="../../src/corlibfe/corlibfe.csproj" />
+  </ItemGroup>
+
+</Project>

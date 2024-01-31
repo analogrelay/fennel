@@ -1,0 +1,4 @@
+{
+    "rust-analyzer.imports.granularity.group": "module",
+    "rust-analyzer.imports.prefix": "crate"
+}

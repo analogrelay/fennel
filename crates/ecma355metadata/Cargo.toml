@@ -1,0 +1,13 @@
+[package]
+name = "ecma355metadata"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+byteorder.workspace = true
+bitflags.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+tracing-subscriber.workspace = true
