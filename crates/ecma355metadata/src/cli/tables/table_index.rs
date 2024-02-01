@@ -61,6 +61,8 @@ pub enum TableIndex {
     ImportScope = 0x35,
     StateMachineMethod = 0x36,
     CustomDebugInformation = 0x37,
+
+    NonExistent = 0xFF,
 }
 
 impl From<u8> for TableIndex {
@@ -183,6 +185,7 @@ impl Iterator for TableIndexIter {
 
 bitflags! {
     pub struct TableMask : u64 {
+        const NonExistent = 0;
         const Module = 1 << TableIndex::Module as u64;
         const TypeRef = 1 << TableIndex::TypeRef as u64;
         const TypeDef = 1 << TableIndex::TypeDef as u64;

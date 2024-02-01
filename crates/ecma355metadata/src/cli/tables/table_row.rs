@@ -31,6 +31,12 @@ impl<'a> RowDecoder<'a> {
         self.metadata_sizes.row_count(table_index)
     }
 
+    pub fn decode_u8(&self, buf: &mut &[u8]) -> Result<u8, Error> {
+        let val = buf[0];
+        *buf = &buf[1..];
+        Ok(val)
+    }
+
     pub fn decode_u16(&self, buf: &mut &[u8]) -> Result<u16, Error> {
         let val = LittleEndian::read_u16(buf);
         *buf = &buf[2..];
@@ -110,7 +116,6 @@ impl<'a> RowDecoder<'a> {
     pub fn any_large(&self, mask: TableMask) -> bool {
         for table in mask.tables() {
             if self.has_large_index(table) {
-                tracing::trace!(table = ?table, "has large index");
                 return true;
             }
         }

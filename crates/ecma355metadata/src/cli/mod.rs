@@ -9,6 +9,7 @@ mod field_attributes;
 mod method_attributes;
 mod method_impl_attributes;
 mod param_attributes;
+mod assembly_flags;
 
 pub mod tables;
 pub mod signatures;
@@ -28,3 +29,4 @@ pub use self::method_impl_attributes::{MethodCodeType, MethodImplAttributes, Met
 pub use self::param_attributes::ParamAttributes;
 pub use self::metadata_sizes::{HeapSizes, MetadataSizes, LARGE_INDEX_SIZE, SMALL_INDEX_SIZE,
                                SMALL_TABLE_MAX_SIZE};
+pub use self::assembly_flags::{AssemblyFlags, AssemblyHashAlgorithm};

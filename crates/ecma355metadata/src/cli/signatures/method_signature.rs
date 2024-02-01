@@ -1,8 +1,6 @@
 use std::fmt;
 use std::io::Read;
 
-use byteorder::ReadBytesExt;
-
 use crate::cli::signatures::{Param, RetType, SignatureCallingConvention, SignatureHeader, TypeReference};
 use crate::cli::signatures::utils;
 use crate::error::Error;
@@ -12,7 +10,6 @@ pub struct MethodSignature {
     pub header: SignatureHeader,
     pub return_type: RetType,
     pub required_parameter_count: u32,
-    pub generic_parameter_count: u32,
     pub parameters: Vec<Param>,
 }
 
@@ -21,25 +18,18 @@ impl MethodSignature {
         header: SignatureHeader,
         return_type: RetType,
         required_parameter_count: u32,
-        generic_parameter_count: u32,
         parameters: Vec<Param>,
     ) -> MethodSignature {
         MethodSignature {
             header,
             return_type,
             required_parameter_count,
-            generic_parameter_count,
             parameters,
         }
     }
 
-    pub fn read<R: Read>(reader: &mut R) -> Result<MethodSignature, Error> {
-        let header = SignatureHeader::new(reader.read_u8()?);
-        let generic_param_count = if header.is_generic() {
-            utils::read_compressed_u32(reader)?
-        } else {
-            0
-        };
+    pub fn read(reader: &mut impl Read) -> Result<MethodSignature, Error> {
+        let header = SignatureHeader::read(reader)?;
         let param_count = utils::read_compressed_u32(reader)?;
         let return_type = RetType::read(reader)?;
 
@@ -59,7 +49,6 @@ impl MethodSignature {
             header,
             return_type,
             required_parameter_count.unwrap_or(param_count),
-            generic_param_count,
             parameters,
         ))
     }
@@ -104,10 +93,9 @@ mod tests {
         let sig = MethodSignature::read(&mut buf).unwrap();
         assert_eq!(
             MethodSignature::new(
-                SignatureHeader::new(0x20),
+                SignatureHeader::new(0x20, 0),
                 RetType::new(vec![], TypeReference::String),
                 2,
-                0,
                 vec![
                     Param::new(vec![], TypeReference::I4),
                     Param::new(vec![], TypeReference::String),
@@ -123,10 +111,9 @@ mod tests {
         let sig = MethodSignature::read(&mut buf).unwrap();
         assert_eq!(
             MethodSignature::new(
-                SignatureHeader::new(0x25),
+                SignatureHeader::new(0x25, 0),
                 RetType::new(vec![], TypeReference::String),
                 2,
-                0,
                 vec![
                     Param::new(vec![], TypeReference::I4),
                     Param::new(vec![], TypeReference::String),

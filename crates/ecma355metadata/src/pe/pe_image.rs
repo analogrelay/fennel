@@ -2,7 +2,6 @@ use std::ops::{Deref, Index, Range};
 use std::io::{Cursor, Read, Seek, SeekFrom};
 
 use byteorder::{LittleEndian, ReadBytesExt};
-use tracing::trace;
 
 use crate::pe::{CoffHeader, MemoryRange, PeHeader, SectionHeader};
 use crate::error::Error;

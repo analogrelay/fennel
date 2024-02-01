@@ -1,15 +1,13 @@
 extern crate ecma355metadata;
 
 use std::env;
-use std::str;
 use std::fs::File;
 use std::io::Cursor;
 
-use ecma355metadata::{MetadataReader, PeImage};
-use ecma355metadata::cli::{Access, CliHeader, MethodFlags, MethodVTableLayout};
-use ecma355metadata::cli::tables::MethodDef;
+use ecma355metadata::cli::{Access, MethodFlags, MethodVTableLayout};
+use ecma355metadata::cli::tables::{Param, MethodDef};
 use ecma355metadata::cli::signatures::MethodSignature;
-use ecma355metadata::pe::DirectoryType;
+use ecma355metadata::MetadataImage;
 
 pub fn main() {
     let args: Vec<_> = env::args().collect();
@@ -18,24 +16,17 @@ pub fn main() {
     } else {
         let file_path = &args[1];
 
-        let mut file = File::open(file_path).unwrap();
-        let pe = PeImage::read(&mut file).unwrap();
-        let cli_header = CliHeader::from_pe_image(&pe).unwrap();
-        let assembly = MetadataReader::new(
-            pe.load(cli_header.metadata.rva, cli_header.metadata.size as usize)
-                .unwrap(),
-        ).unwrap();
+        let file = File::open(file_path).unwrap();
+        let image = MetadataImage::read(file).expect("failed to read metadata image");
 
-        let methods: Vec<_> = assembly
-            .tables()
-            .method_def()
+        let methods: Vec<_> = image
+            .table::<MethodDef>()
             .iter()
             .map(|o| o.unwrap())
             .collect();
 
-        let params: Vec<_> = assembly
-            .tables()
-            .param()
+        let params: Vec<_> = image
+            .table::<Param>()
             .iter()
             .map(|o| o.unwrap())
             .collect();
@@ -44,7 +35,7 @@ pub fn main() {
             let method = &methods[idx];
 
             // Load the method signature blob
-            let mut sig_blob = Cursor::new(assembly.get_blob(method.signature).unwrap());
+            let mut sig_blob = Cursor::new(image.get_blob(method.signature).unwrap());
             let signature = MethodSignature::read(&mut sig_blob).unwrap();
 
             print!(" [0x{:08X}] ", method.rva);
@@ -52,31 +43,30 @@ pub fn main() {
             write_flags(method);
 
             let name =
-                str::from_utf8(assembly.get_string(method.name).unwrap_or(b"<null>")).unwrap();
+                image.get_string(method.name).unwrap();
 
             print!("{} ", signature.return_type);
 
-            print!("{}(", name);
+            print!("{:?}(", name);
 
             // Identify the end of the param list by looking at the next method
             let end = if idx == methods.len() - 1 {
                 params.len()
             } else {
-                methods[idx + 1].params.index()
+                methods[idx + 1].params.index() - 1
             };
 
             // Iterate over the params
             let mut first = true;
-            for (idx, param) in params[method.params.index()..end].iter().enumerate() {
+            for (idx, param) in params[(method.params.index() - 1)..end].iter().enumerate() {
                 let param_sig = &signature.parameters[idx];
                 if first {
                     first = false;
                 } else {
                     print!(", ");
                 }
-                let name =
-                    str::from_utf8(assembly.get_string(param.name).unwrap_or(b"<null>")).unwrap();
-                print!("{} {}", param_sig, name);
+                let name = image.get_string(param.name).unwrap();
+                print!("{} {:?}", param_sig, name);
             }
             println!(")")
         }

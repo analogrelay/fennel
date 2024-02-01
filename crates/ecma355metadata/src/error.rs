@@ -35,7 +35,7 @@ pub enum Error {
 
     /// The metadata file is invalid in an unexpected way.
     #[error("invalid metadata: {0}")]
-    InvalidMetadata(&'static str),
+    InvalidMetadata(String),
 
     /// An invalid heap reference was provided.
     #[error("invalid heap reference")]

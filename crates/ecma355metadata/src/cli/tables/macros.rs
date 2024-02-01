@@ -80,7 +80,7 @@ macro_rules! table_def {
     };
 
     (@DECODE $ty: ident as $from_ty: ident, $decoder: ident, $buf: ident) => {
-        $ty::from(table_def!(@DECODE $from_ty, $decoder, $buf))
+        $ty::try_from(table_def!(@DECODE $from_ty, $decoder, $buf))?
     };
     (@SIZE $ty: ident as $from_ty: ident, $decoder: ident) => {
         table_def!(@SIZE $from_ty, $decoder)
@@ -98,6 +98,13 @@ macro_rules! table_def {
     };
     (@SIZE u32, $decoder: ident) => {
         4
+    };
+
+    (@DECODE u8, $decoder: ident, $buf: ident) => {
+        $decoder.decode_u8(&mut $buf)?
+    };
+    (@SIZE u8, $decoder: ident) => {
+        1
     };
 
     (@DECODE StringHandle, $decoder: ident, $buf: ident) => {

@@ -1,6 +1,7 @@
 // We want MethodAttributes to use the same names as in the ECMA spec, which are PascalCased, not UPPER_SNAKE_CASE
 #![allow(non_upper_case_globals)]
 
+use std::convert::Infallible;
 use std::mem;
 
 use crate::cli::Access;
@@ -30,9 +31,11 @@ impl MethodAttributes {
     }
 }
 
-impl std::convert::From<u16> for MethodAttributes {
-    fn from(value: u16) -> MethodAttributes {
-        MethodAttributes::new(value)
+impl std::convert::TryFrom<u16> for MethodAttributes {
+    type Error = Infallible;
+
+    fn try_from(value: u16) -> Result<MethodAttributes, Infallible> {
+        Ok(MethodAttributes::new(value))
     }
 }
 

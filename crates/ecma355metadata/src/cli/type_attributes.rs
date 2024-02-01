@@ -1,6 +1,7 @@
 // We want TypeAttributes to use the same names as in the ECMA spec, which are PascalCased, not UPPER_SNAKE_CASE
 #![allow(non_upper_case_globals)]
 
+use std::convert::Infallible;
 use std::mem;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -40,9 +41,11 @@ impl TypeAttributes {
     }
 }
 
-impl std::convert::From<u32> for TypeAttributes {
-    fn from(value: u32) -> TypeAttributes {
-        TypeAttributes::new(value)
+impl std::convert::TryFrom<u32> for TypeAttributes {
+    type Error = Infallible;
+
+    fn try_from(value: u32) -> Result<TypeAttributes, Infallible> {
+        Ok(TypeAttributes::new(value))
     }
 }
 

@@ -22,7 +22,7 @@ impl ArrayShape {
         }
     }
 
-    pub fn read<R: Read>(reader: &mut R) -> Result<ArrayShape, Error> {
+    pub fn read(reader: &mut impl Read) -> Result<ArrayShape, Error> {
         let rank = utils::read_compressed_u32(reader)?;
         let num_sizes = utils::read_compressed_u32(reader)?;
         let mut sizes = Vec::with_capacity(num_sizes as usize);
@@ -80,7 +80,7 @@ pub enum TypeReference {
 }
 
 impl TypeReference {
-    pub fn read<R: Read>(reader: &mut R) -> Result<TypeReference, Error> {
+    pub fn read(reader: &mut impl Read) -> Result<TypeReference, Error> {
         utils::read_type(utils::read_compressed_u32(reader)?, reader)
     }
 }
@@ -224,20 +224,18 @@ mod tests {
         ));
         sentinel([0x41], TypeReference::Sentinel);
         fnptr_simple([0x1B, 0x20, 0x02, 0x0E, 0x08, 0x0E], TypeReference::FnPtr(Box::new(MethodSignature::new(
-            SignatureHeader::new(0x20),
+            SignatureHeader::new(0x20, 0),
             RetType::new(vec![], TypeReference::String),
             2,
-            0,
             vec![
                 Param::new(vec![], TypeReference::I4),
                 Param::new(vec![], TypeReference::String),
             ]
         ))));
         fnptr_varargs([0x1B, 0x25, 0x03, 0x0E, 0x08, 0x0E, 0x41, 0x0C], TypeReference::FnPtr(Box::new(MethodSignature::new(
-            SignatureHeader::new(0x25),
+            SignatureHeader::new(0x25, 0),
             RetType::new(vec![], TypeReference::String),
             2,
-            0,
             vec![
                 Param::new(vec![], TypeReference::I4),
                 Param::new(vec![], TypeReference::String),

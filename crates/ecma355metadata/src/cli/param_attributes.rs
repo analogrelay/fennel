@@ -1,6 +1,8 @@
 // We want ParamAttributes to use the same names as in the ECMA spec, which are PascalCased, not UPPER_SNAKE_CASE
 #![allow(non_upper_case_globals)]
 
+use std::convert::Infallible;
+
 bitflags! {
     pub struct ParamAttributes : u16 {
         const In = 0x0001;
@@ -11,9 +13,11 @@ bitflags! {
     }
 }
 
-impl From<u16> for ParamAttributes {
-    fn from(value: u16) -> ParamAttributes {
-        ParamAttributes::from_bits_truncate(value)
+impl std::convert::TryFrom<u16> for ParamAttributes {
+    type Error = Infallible;
+
+    fn try_from(value: u16) -> Result<ParamAttributes, Infallible> {
+        Ok(ParamAttributes::from_bits_truncate(value))
     }
 }
 

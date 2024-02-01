@@ -37,7 +37,7 @@ impl MetadataHeader {
             // Read the string (unsafe because we use set_len)
             let version_bytes = utils::read_bytes(&mut buf, version_length)?;
             let version = String::from_utf8(version_bytes)
-                .or(Err(Error::InvalidMetadata("invalid UTF-8 string")))?;
+                .or(Err(Error::InvalidMetadata("invalid UTF-8 string".into())))?;
 
             // Use Seek to get the current position
             let current_file_pos = buf.seek(SeekFrom::Current(0))?;

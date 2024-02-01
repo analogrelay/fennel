@@ -22,10 +22,12 @@ impl TableHandle {
         TableHandle::new(index as usize, table.into())
     }
 
+    /// Gets the table index of the handle.
     pub fn table(&self) -> TableIndex {
         self.table
     }
 
+    /// Gets the 1-based index of the row in the table.
     pub fn index(&self) -> usize {
         self.index
     }

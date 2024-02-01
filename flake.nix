@@ -33,7 +33,9 @@
           ]);
 
         fennel = craneLib.buildPackage {
+          pname = "fennel";
           version = "0.1.0";
+
           src = craneLib.cleanCargoSource (craneLib.path ./.);
           strictDeps = true;
 

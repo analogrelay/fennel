@@ -19,7 +19,7 @@ impl Param {
         }
     }
 
-    pub fn read<R: Read>(reader: &mut R) -> Result<Param, Error> {
+    pub fn read(reader: &mut impl Read) -> Result<Param, Error> {
         let (mods, typ) = utils::read_modifiers_and_type(reader)?;
         Ok(Param::new(mods, typ))
     }

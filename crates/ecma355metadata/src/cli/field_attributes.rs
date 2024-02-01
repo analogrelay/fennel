@@ -25,9 +25,11 @@ impl FieldAttributes {
     }
 }
 
-impl std::convert::From<u16> for FieldAttributes {
-    fn from(value: u16) -> FieldAttributes {
-        FieldAttributes::new(value)
+impl std::convert::TryFrom<u16> for FieldAttributes {
+    type Error = Infallible;
+
+    fn try_from(value: u16) -> Result<FieldAttributes, Infallible> {
+        Ok(FieldAttributes::new(value))
     }
 }
 

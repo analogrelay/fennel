@@ -19,7 +19,7 @@ impl RetType {
         }
     }
 
-    pub fn read<R: Read>(reader: &mut R) -> Result<RetType, Error> {
+    pub fn read(reader: &mut impl Read) -> Result<RetType, Error> {
         let (mods, typ) = utils::read_modifiers_and_type(reader)?;
         Ok(RetType::new(mods, typ))
     }

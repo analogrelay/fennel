@@ -6,7 +6,7 @@ use crate::cli::signatures::{ArrayShape, CustomModifier, TypeReference, MethodSi
 use crate::error::Error;
 
 // Utilities for reading, used by types within this module
-pub fn read_type_def_or_ref_spec_encoded<R: Read>(reader: &mut R) -> Result<TableHandle, Error> {
+pub fn read_type_def_or_ref_spec_encoded(reader: &mut impl Read) -> Result<TableHandle, Error> {
     let val = read_compressed_u32(reader)?;
 
     // Determine the table and index
@@ -16,12 +16,12 @@ pub fn read_type_def_or_ref_spec_encoded<R: Read>(reader: &mut R) -> Result<Tabl
         0x00 => TableIndex::TypeDef,
         0x01 => TableIndex::TypeRef,
         0x02 => TableIndex::TypeSpec,
-        _ => return Err(Error::InvalidMetadata("Invalid TypeDefOrRefSpecEncoded value. Tag value is out of range."))
+        _ => return Err(Error::InvalidMetadata("invalid TypeDefOrRefSpecEncoded value, tag value is out of range".into()))
     };
     Ok(TableHandle::new(index as usize, table))
 }
 
-pub fn read_type<R: Read>(discriminator: u32, reader: &mut R) -> Result<TypeReference, Error> {
+pub fn read_type(discriminator: u32, reader: &mut impl Read) -> Result<TypeReference, Error> {
     match discriminator {
         0x00 => Ok(TypeReference::End),
         0x01 => Ok(TypeReference::Void),
@@ -87,7 +87,7 @@ pub fn read_type<R: Read>(discriminator: u32, reader: &mut R) -> Result<TypeRefe
     }
 }
 
-pub fn read_modifiers_and_type<R: Read>(reader: &mut R) -> Result<(Vec<CustomModifier>, TypeReference), Error> {
+pub fn read_modifiers_and_type(reader: &mut impl Read) -> Result<(Vec<CustomModifier>, TypeReference), Error> {
     let mut cur = read_compressed_u32(reader)?;
     let mut mods = Vec::new();
     while cur == 0x20 || cur == 0x1F {
@@ -96,7 +96,7 @@ pub fn read_modifiers_and_type<R: Read>(reader: &mut R) -> Result<(Vec<CustomMod
             0x1F => true,
             _ => {
                 return Err(Error::InvalidMetadata(
-                    "Invalid CMOD value for Custom Modifier.",
+                    "invalid CMOD value for custom modifier".into(),
                 ))
             }
         };
@@ -108,11 +108,11 @@ pub fn read_modifiers_and_type<R: Read>(reader: &mut R) -> Result<(Vec<CustomMod
 }
 
 // From: https://source.dot.net/#System.Reflection.Metadata/System/Reflection/Metadata/BlobReader.cs,494
-pub fn read_compressed_u32<R: Read>(reader: &mut R) -> Result<u32, Error> {
+pub fn read_compressed_u32(reader: &mut impl Read) -> Result<u32, Error> {
     Ok(read_compressed_u32_helper(reader)?.0)
 }
 
-pub fn read_compressed_i32<R: Read>(reader: &mut R) -> Result<i32, Error> {
+pub fn read_compressed_i32(reader: &mut impl Read) -> Result<i32, Error> {
     let (mut val, bytes) = read_compressed_u32_helper(reader)?;
     let sign_extend = (val & 0x1) != 0;
     val >>= 1;
@@ -130,7 +130,7 @@ pub fn read_compressed_i32<R: Read>(reader: &mut R) -> Result<i32, Error> {
     }
 }
 
-fn read_compressed_u32_helper<R: Read>(reader: &mut R) -> Result<(u32, usize), Error> {
+fn read_compressed_u32_helper(reader: &mut impl Read) -> Result<(u32, usize), Error> {
     let mut buf = [0u8; 4];
     reader.read_exact(&mut buf[0..1])?;
     if buf[0] & 0x80 == 0 {

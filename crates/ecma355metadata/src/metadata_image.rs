@@ -10,7 +10,7 @@ use crate::cli::{BlobHandle, CliHeader, GuidHandle, MetadataHeader, MetadataSize
 use crate::cli::tables::{Table, TableRow, RowDecoder};
 use crate::error::Error;
 use crate::Guid;
-use crate::cli::heaps::{Handle, Heaps};
+use crate::cli::heaps::Heaps;
 
 pub struct MetadataImage<D: Deref<Target = [u8]> = Vec<u8>> {
     pe: PeImage<D>,
@@ -44,7 +44,7 @@ impl<D: Deref<Target = [u8]>> MetadataImage<D> {
         let stream = metadata_header
             .get_stream("#~")
             .ok_or(Error::InvalidMetadata(
-                "image does not contain a '#~' metadata stream",
+                "image does not contain a '#~' metadata stream".into(),
             ))?;
         let stream_buf = &metadata_buf[stream.offset as usize..(stream.offset + stream.size) as usize];
         let mut cursor = Cursor::new(stream_buf);
@@ -84,6 +84,49 @@ impl<D: Deref<Target = [u8]>> MetadataImage<D> {
             skip_table(&row_decoder, TableIndex::ParamPtr);
             load_table::<tables::Param>(&mut table_offsets, &mut table_base_rva, &row_decoder);
             load_table::<tables::InterfaceImpl>(&mut table_offsets, &mut table_base_rva, &row_decoder);
+            load_table::<tables::MemberRef>(&mut table_offsets, &mut table_base_rva, &row_decoder);
+            load_table::<tables::Constant>(&mut table_offsets, &mut table_base_rva, &row_decoder);
+            load_table::<tables::CustomAttribute>(&mut table_offsets, &mut table_base_rva, &row_decoder);
+            skip_table(&row_decoder, TableIndex::FieldMarshal);
+            skip_table(&row_decoder, TableIndex::DeclSecurity);
+            skip_table(&row_decoder, TableIndex::ClassLayout);
+            skip_table(&row_decoder, TableIndex::FieldLayout);
+            skip_table(&row_decoder, TableIndex::StandAloneSig);
+            skip_table(&row_decoder, TableIndex::EventMap);
+            skip_table(&row_decoder, TableIndex::EventPtr);
+            skip_table(&row_decoder, TableIndex::Event);
+            skip_table(&row_decoder, TableIndex::PropertyMap);
+            skip_table(&row_decoder, TableIndex::PropertyPtr);
+            skip_table(&row_decoder, TableIndex::Property);
+            skip_table(&row_decoder, TableIndex::MethodSemantics);
+            skip_table(&row_decoder, TableIndex::MethodImpl);
+            skip_table(&row_decoder, TableIndex::ModuleRef);
+            skip_table(&row_decoder, TableIndex::TypeSpec);
+            skip_table(&row_decoder, TableIndex::ImplMap);
+            skip_table(&row_decoder, TableIndex::FieldRva);
+            skip_table(&row_decoder, TableIndex::EncLog);
+            skip_table(&row_decoder, TableIndex::EncMap);
+            load_table::<tables::Assembly>(&mut table_offsets, &mut table_base_rva, &row_decoder);
+            skip_table(&row_decoder, TableIndex::AssemblyProcessor);
+            skip_table(&row_decoder, TableIndex::AssemblyOS);
+            load_table::<tables::AssemblyRef>(&mut table_offsets, &mut table_base_rva, &row_decoder);
+            skip_table(&row_decoder, TableIndex::AssemblyRefProcessor);
+            skip_table(&row_decoder, TableIndex::AssemblyRefOS);
+            skip_table(&row_decoder, TableIndex::File);
+            skip_table(&row_decoder, TableIndex::ExportedType);
+            skip_table(&row_decoder, TableIndex::ManifestResource);
+            skip_table(&row_decoder, TableIndex::NestedClass);
+            skip_table(&row_decoder, TableIndex::GenericParam);
+            skip_table(&row_decoder, TableIndex::MethodSpec);
+            skip_table(&row_decoder, TableIndex::GenericParamConstraint);
+            skip_table(&row_decoder, TableIndex::Document);
+            skip_table(&row_decoder, TableIndex::MethodDebugInformation);
+            skip_table(&row_decoder, TableIndex::LocalScope);
+            skip_table(&row_decoder, TableIndex::LocalVariable);
+            skip_table(&row_decoder, TableIndex::LocalConstant);
+            skip_table(&row_decoder, TableIndex::ImportScope);
+            skip_table(&row_decoder, TableIndex::StateMachineMethod);
+            skip_table(&row_decoder, TableIndex::CustomDebugInformation);
         }
 
         // Find heap offsets
